@@ -31,13 +31,23 @@ app.use((req, res, next) => {
 
 // Utility function to read and write JSON file
 function readData() {
-    const data = fs.readFileSync(dataFilePath, 'utf8');
-    return JSON.parse(data);
+    try {
+        const data = fs.readFileSync(dataFilePath, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        console.error("Failed to read data:", error);
+        return []; // Return empty array or handle as needed
+    }
 }
 
 function writeData(data) {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+    try {
+        fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+    } catch (error) {
+        console.error("Failed to write data:", error);
+    }
 }
+
 
 // Initialize data file if not present
 if (!fs.existsSync(dataFilePath)) {
@@ -46,13 +56,18 @@ if (!fs.existsSync(dataFilePath)) {
 
 // GET endpoint - Fetch all items
 app.post('/api/items', (req, res) => {
-    console.log("Received data:", req.body); // Log received data
-    const items = readData();
-    const newItem = { id: items.length + 1, ...req.body };
-    items.push(newItem);
-    writeData(items);
-    res.status(201).json(newItem);
+    try {
+        const items = readData();
+        const newItem = { id: items.length + 1, ...req.body };
+        items.push(newItem);
+        writeData(items);
+        res.status(201).json(newItem);
+    } catch (error) {
+        console.error("Error adding item:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 });
+
 
 // POST endpoint - Add a new item
 app.post('/api/items', (req, res) => {
