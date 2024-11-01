@@ -7,25 +7,30 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Sample data
-let items = [
-    { id: 1, name: 'Item 1' },
-    { id: 2, name: 'Item 2' },
-];
+// Sample data storage
+let items = [];
 
 // GET endpoint
 app.get('/api/items', (req, res) => {
     res.json(items);
 });
 
-// POST endpoint - Add a new item
+// POST endpoint - Add a new item with ticket details
 app.post('/api/items', (req, res) => {
-    const newItem = { id: items.length + 1, name: req.body.name };
+    const newItem = {
+        id: items.length + 1,
+        studentTickets: req.body.studentTickets,
+        parentTickets: req.body.parentTickets,
+        tableTickets: req.body.tableTickets,
+        studentNames: req.body.studentNames,
+        parentNames: req.body.parentNames,
+        total: req.body.total
+    };
     items.push(newItem);
     res.status(201).json(newItem);
 });
 
-// PUT endpoint - Update an existing item by ID
+// PUT and DELETE endpoints remain unchanged
 app.put('/api/items/:id', (req, res) => {
     const itemId = parseInt(req.params.id, 10);
     const itemIndex = items.findIndex(item => item.id === itemId);
@@ -38,7 +43,6 @@ app.put('/api/items/:id', (req, res) => {
     res.json(items[itemIndex]);
 });
 
-// DELETE endpoint - Delete an item by ID
 app.delete('/api/items/:id', (req, res) => {
     const itemId = parseInt(req.params.id, 10);
     const itemIndex = items.findIndex(item => item.id === itemId);
