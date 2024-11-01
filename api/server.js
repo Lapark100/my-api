@@ -9,7 +9,7 @@ const dataFilePath = path.join(__dirname, 'data.json');
 
 // Middleware
 app.use(cors({
-    origin: 'https://your-frontend-url.com', // Replace with actual frontend URL
+    origin: '*', // Temporarily allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type']
 }));
