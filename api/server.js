@@ -8,7 +8,12 @@ const app = express();
 const dataFilePath = path.join(__dirname, 'data.json');
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: 'https://your-frontend-url.com', // Replace with actual frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
 // Utility function to read and write JSON file
