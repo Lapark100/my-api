@@ -1,9 +1,8 @@
-// app.js
+// api/index.js
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3001;
 
 // Middleware
 app.use(cors());
@@ -27,7 +26,4 @@ app.post('/api/items', (req, res) => {
     res.status(201).json(newItem);
 });
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+module.exports = app;
