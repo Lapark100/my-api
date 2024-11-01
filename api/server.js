@@ -32,9 +32,13 @@ if (!fs.existsSync(dataFilePath)) {
 }
 
 // GET endpoint - Fetch all items
-app.get('/api/items', (req, res) => {
+app.post('/api/items', (req, res) => {
+    console.log("Received data:", req.body); // Log received data
     const items = readData();
-    res.json(items);
+    const newItem = { id: items.length + 1, ...req.body };
+    items.push(newItem);
+    writeData(items);
+    res.status(201).json(newItem);
 });
 
 // POST endpoint - Add a new item
