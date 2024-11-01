@@ -10,12 +10,24 @@ const dataFilePath = path.join(__dirname, 'data.json');
 // Middleware
 const cors = require('cors');
 
-app.use(cors({ 
-    origin: '*'  // Allows requests from any origin
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'DELETE', 'PUT'], // Allow required methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
 }));
 
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    if (req.method === "OPTIONS") {
+        return res.status(200).end(); // Respond OK to preflight OPTIONS requests
+    }
+    next();
+});
 
 // Utility function to read and write JSON file
 function readData() {
