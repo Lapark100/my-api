@@ -8,11 +8,12 @@ const app = express();
 const dataFilePath = path.join(__dirname, 'data.json');
 
 // Middleware
-app.use(cors({
-    origin: '*', // Temporarily allow all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type']
+const cors = require('cors');
+
+app.use(cors({ 
+    origin: '*'  // Allows requests from any origin
 }));
+
 
 app.use(express.json());
 
