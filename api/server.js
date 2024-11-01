@@ -1,37 +1,49 @@
+// api/index.js
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
+const dataFilePath = path.join(__dirname, 'data.json');
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Sample data storage
-let items = [];
+// Utility function to read and write JSON file
+function readData() {
+    const data = fs.readFileSync(dataFilePath, 'utf8');
+    return JSON.parse(data);
+}
 
-// GET endpoint
+function writeData(data) {
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+}
+
+// Initialize data file if not present
+if (!fs.existsSync(dataFilePath)) {
+    writeData([]); // Start with an empty array
+}
+
+// GET endpoint - Fetch all items
 app.get('/api/items', (req, res) => {
+    const items = readData();
     res.json(items);
 });
 
-// POST endpoint - Add a new item with ticket details
+// POST endpoint - Add a new item
 app.post('/api/items', (req, res) => {
-    const newItem = {
-        id: items.length + 1,
-        studentTickets: req.body.studentTickets,
-        parentTickets: req.body.parentTickets,
-        tableTickets: req.body.tableTickets,
-        studentNames: req.body.studentNames,
-        parentNames: req.body.parentNames,
-        total: req.body.total
-    };
+    const items = readData();
+    const newItem = { id: items.length + 1, ...req.body };
     items.push(newItem);
+    writeData(items);
     res.status(201).json(newItem);
 });
 
-// PUT and DELETE endpoints remain unchanged
+// PUT endpoint - Update an existing item by ID
 app.put('/api/items/:id', (req, res) => {
+    const items = readData();
     const itemId = parseInt(req.params.id, 10);
     const itemIndex = items.findIndex(item => item.id === itemId);
 
@@ -39,11 +51,14 @@ app.put('/api/items/:id', (req, res) => {
         return res.status(404).json({ message: 'Item not found' });
     }
 
-    items[itemIndex].name = req.body.name || items[itemIndex].name;
+    items[itemIndex] = { ...items[itemIndex], ...req.body };
+    writeData(items);
     res.json(items[itemIndex]);
 });
 
+// DELETE endpoint - Delete an item by ID
 app.delete('/api/items/:id', (req, res) => {
+    const items = readData();
     const itemId = parseInt(req.params.id, 10);
     const itemIndex = items.findIndex(item => item.id === itemId);
 
@@ -52,6 +67,7 @@ app.delete('/api/items/:id', (req, res) => {
     }
 
     const deletedItem = items.splice(itemIndex, 1)[0];
+    writeData(items);
     res.json(deletedItem);
 });
 
