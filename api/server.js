@@ -41,6 +41,7 @@ function readData() {
 function writeData(data) {
     try {
         fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+        console.log("Data written successfully:", data); // <-- Add this
     } catch (error) {
         console.error("Failed to write data:", error);
     }
@@ -70,6 +71,7 @@ app.post('/api/items', (req, res) => {
     writeData(items);
     res.status(201).json(newItem);
 });
+
 
 // PUT endpoint - Update an existing item by ID
 app.put('/api/items/:id', (req, res) => {
