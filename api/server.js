@@ -8,51 +8,44 @@ const app = express();
 const dataFilePath = path.join(__dirname, 'data.json');
 
 // Middleware
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'DELETE', 'PUT'], // Allow required methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
-}));
-
+app.use(cors());
 app.use(express.json());
 
-// CORS headers
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    if (req.method === "OPTIONS") {
-        return res.status(200).end(); // Respond OK to preflight OPTIONS requests
+// Initialize data file if it doesn’t exist
+function initializeDataFile() {
+    if (!fs.existsSync(dataFilePath)) {
+        console.log("data.json file not found, creating one...");
+        fs.writeFileSync(dataFilePath, JSON.stringify([], null, 2), 'utf8'); // Write an empty array
+        console.log("data.json created successfully.");
     }
-    next();
-});
+}
 
-// Utility function to read and write JSON file
+// Call initializeDataFile to create the file on startup if needed
+initializeDataFile();
+
+// Utility functions to read and write JSON data
 function readData() {
     try {
         const data = fs.readFileSync(dataFilePath, 'utf8');
         return JSON.parse(data);
     } catch (error) {
         console.error("Failed to read data:", error);
-        return []; // Return empty array or handle as needed
+        return [];
     }
 }
 
 function writeData(data) {
     try {
         fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
-        console.log("Data written successfully:", data); // <-- Add this
+        console.log("Data written successfully");
     } catch (error) {
         console.error("Failed to write data:", error);
     }
 }
 
-// Initialize data file if not present
-if (!fs.existsSync(dataFilePath)) {
-    writeData([]); // Start with an empty array
-}
+// REST API Endpoints
 
-// GET endpoint - Fetch all items
+// GET - Fetch all items
 app.get('/api/items', (req, res) => {
     try {
         const items = readData();
@@ -63,7 +56,7 @@ app.get('/api/items', (req, res) => {
     }
 });
 
-// POST endpoint - Add a new item
+// POST - Add a new item
 app.post('/api/items', (req, res) => {
     const items = readData();
     const newItem = { id: items.length + 1, ...req.body };
@@ -72,23 +65,7 @@ app.post('/api/items', (req, res) => {
     res.status(201).json(newItem);
 });
 
-
-// PUT endpoint - Update an existing item by ID
-app.put('/api/items/:id', (req, res) => {
-    const items = readData();
-    const itemId = parseInt(req.params.id, 10);
-    const itemIndex = items.findIndex(item => item.id === itemId);
-
-    if (itemIndex === -1) {
-        return res.status(404).json({ message: 'Item not found' });
-    }
-
-    items[itemIndex] = { ...items[itemIndex], ...req.body };
-    writeData(items);
-    res.json(items[itemIndex]);
-});
-
-// DELETE endpoint - Delete an item by ID
+// DELETE - Remove an item by ID
 app.delete('/api/items/:id', (req, res) => {
     const items = readData();
     const itemId = parseInt(req.params.id, 10);
