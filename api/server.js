@@ -8,17 +8,15 @@ const app = express();
 const dataFilePath = path.join(__dirname, 'data.json');
 
 // Middleware
-const cors = require('cors');
-
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'DELETE', 'PUT'], // Allow required methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
 }));
 
-
 app.use(express.json());
 
+// CORS headers
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -48,26 +46,21 @@ function writeData(data) {
     }
 }
 
-
 // Initialize data file if not present
 if (!fs.existsSync(dataFilePath)) {
     writeData([]); // Start with an empty array
 }
 
 // GET endpoint - Fetch all items
-app.post('/api/items', (req, res) => {
+app.get('/api/items', (req, res) => {
     try {
         const items = readData();
-        const newItem = { id: items.length + 1, ...req.body };
-        items.push(newItem);
-        writeData(items);
-        res.status(201).json(newItem);
+        res.json(items);
     } catch (error) {
-        console.error("Error adding item:", error);
+        console.error("Error fetching items:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
-
 
 // POST endpoint - Add a new item
 app.post('/api/items', (req, res) => {
